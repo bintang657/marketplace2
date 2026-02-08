@@ -1,36 +1,39 @@
 const WA_NUMBER = "6281225980437";
 
 window.addEventListener('load', () => {
-  // 1. Loading Bar Animation
+  // Boot bar
   setTimeout(() => {
     const bar = document.getElementById('boot-bar');
     if (bar) bar.style.width = "100%";
   }, 100);
 
-  // 2. Show Button after Loading
+  // Show start button
   setTimeout(() => {
-    const btn = document.getElementById('start-btn');
-    if (btn) btn.classList.remove('hidden');
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) startBtn.classList.remove('hidden');
   }, 1500);
 
-  // 3. Init effects
+  // Init effects
   initMatrix();
   startCountdown();
   initSatellite();
-
-  // NEW: features you already loaded
   initParticles();
   initTilt();
-  initSfx();
 
-  // 4. Enter System Logic
+  // Init UX features (NEW)
+  initSfx();
+  initScrollDNA();       // NEW: scroll progress
+  initNavbarBehavior();  // NEW: auto-hide + solid on scroll
+  initBackToTop();       // NEW: button top
+  initKeyboardShortcuts();// NEW: esc/m/enter
+  initPricingPersistence();// NEW: localStorage
+
+  // Start click
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
     startBtn.addEventListener('click', () => {
-      // Try play sound, ignore if blocked
       try { document.getElementById('bootSound')?.play(); } catch (e) {}
 
-      // Remove boot screen
       const screen = document.getElementById('boot-screen');
       if (!screen) return;
 
@@ -46,7 +49,7 @@ window.addEventListener('load', () => {
   }
 });
 
-// --- MATRIX RAIN (with resize) ---
+// ========= MATRIX (resize safe) =========
 function initMatrix() {
   const canvas = document.getElementById('matrix-canvas');
   if (!canvas) return;
@@ -83,7 +86,7 @@ function initMatrix() {
   setInterval(draw, 33);
 }
 
-// --- SATELLITE ---
+// ========= SATELLITE =========
 function initSatellite() {
   setInterval(() => {
     const coords = document.getElementById('sat-coords');
@@ -95,7 +98,7 @@ function initSatellite() {
   }, 2000);
 }
 
-// --- COUNTDOWN ---
+// ========= COUNTDOWN =========
 function startCountdown() {
   let time = 900;
   setInterval(() => {
@@ -107,7 +110,7 @@ function startCountdown() {
   }, 1000);
 }
 
-// --- TYPEWRITER ---
+// ========= TYPEWRITER =========
 const words = ["FUTURE", "EMPIRE", "LEGACY", "SYSTEM"];
 let wordIndex = 0;
 let charIndex = 0;
@@ -136,7 +139,7 @@ function initTypewriter() {
   setTimeout(initTypewriter, speed);
 }
 
-// --- CURSOR ---
+// ========= CURSOR =========
 const cursor = document.getElementById('cursor-hud');
 document.addEventListener('mousemove', e => {
   if (cursor) {
@@ -145,13 +148,19 @@ document.addEventListener('mousemove', e => {
   }
 });
 
-document.querySelectorAll('a, button, .tilt-card').forEach(el => {
-  el.addEventListener('mouseenter', () => { if (cursor) cursor.classList.add('hover-active'); });
-  el.addEventListener('mouseleave', () => { if (cursor) cursor.classList.remove('hover-active'); });
-});
+function bindCursorHoverTargets() {
+  document.querySelectorAll('a, button, .tilt-card').forEach(el => {
+    if (el.dataset.cursorBound) return;
+    el.dataset.cursorBound = "1";
+    el.addEventListener('mouseenter', () => { if (cursor) cursor.classList.add('hover-active'); });
+    el.addEventListener('mouseleave', () => { if (cursor) cursor.classList.remove('hover-active'); });
+  });
+}
+bindCursorHoverTargets();
 
-// --- CHECKOUT LOGIC ---
-let currProd = "", currPrice = 0;
+// ========= CHECKOUT =========
+let currProd = "";
+let currPrice = 0;
 
 function openCheckout(p, pr) {
   currProd = p;
@@ -159,6 +168,11 @@ function openCheckout(p, pr) {
   renderCheckout();
   const modal = document.getElementById('checkout-modal');
   if (modal) modal.style.display = 'flex';
+}
+
+function closeCheckout() {
+  const modal = document.getElementById('checkout-modal');
+  if (modal) modal.style.display = 'none';
 }
 
 function renderCheckout() {
@@ -184,15 +198,24 @@ function renderCheckout() {
     </div>
     <div class="flex justify-between items-center border-t border-gray-800 pt-4">
       <div class="text-white font-bold text-xl">Rp ${currPrice.toLocaleString('id-ID')}</div>
-      <button onclick="processFinalOrder()"
-        class="bg-cyan-500 text-black font-black px-6 py-2 hover:bg-white transition uppercase text-xs sfx-click shadow-lg">
+      <button id="sendWaBtn" onclick="processFinalOrder()"
+        class="bg-cyan-500 text-black font-black px-8 py-2 hover:bg-white transition uppercase text-xs sfx-click shadow-lg">
         KIRIM WA
       </button>
     </div>
   `;
 
-  // Re-init SFX for newly created button in modal
   initSfx();
+  bindCursorHoverTargets();
+
+  const nameInput = document.getElementById('buyer-name');
+  if (nameInput) nameInput.focus();
+
+  if (nameInput) {
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === "Enter") processFinalOrder();
+    });
+  }
 }
 
 function processFinalOrder() {
@@ -201,7 +224,6 @@ function processFinalOrder() {
 
   const msg = `ORDER\n👤 ${name}\n📦 ${currProd}\n💰 Rp ${currPrice.toLocaleString('id-ID')}`;
   const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
-
   window.location.href = url;
 }
 
@@ -212,18 +234,21 @@ function calcPrice() {
 
   const totalEl = document.getElementById('totalPrice');
   if (totalEl) totalEl.innerText = t > 0 ? `Rp ${t.toLocaleString('id-ID')}` : "Rp 0";
+
+  try {
+    localStorage.setItem("mk2_projectType", String(project));
+    localStorage.setItem("mk2_addonType", String(addon));
+  } catch (e) {}
 }
 
 function triggerOrder() {
   const p = document.getElementById('projectType');
   const addon = Number(document.getElementById('addonType')?.value || 0);
-
   if (!p || Number(p.value) === 0) { alert("Pilih paket!"); return; }
-
   openCheckout(p.options[p.selectedIndex].text, Number(p.value) + addon);
 }
 
-// --- MUSIC ---
+// ========= MUSIC =========
 const bgMusic = document.getElementById('bgMusic');
 if (bgMusic) bgMusic.volume = 0.3;
 
@@ -235,9 +260,7 @@ function toggleMusic() {
   isPlaying = !isPlaying;
 }
 
-// ===== NEW FEATURES =====
-
-// Particles.js init (library already loaded in HTML)
+// ========= NEW: Particles =========
 function initParticles() {
   const el = document.getElementById('particles-js');
   if (!el || typeof particlesJS === "undefined") return;
@@ -260,21 +283,14 @@ function initParticles() {
     },
     interactivity: {
       detect_on: "window",
-      events: {
-        onhover: { enable: true, mode: "grab" },
-        onclick: { enable: true, mode: "push" },
-        resize: true
-      },
-      modes: {
-        grab: { distance: 170, line_linked: { opacity: 0.35 } },
-        push: { particles_nb: 2 }
-      }
+      events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+      modes: { grab: { distance: 170, line_linked: { opacity: 0.35 } }, push: { particles_nb: 2 } }
     },
     retina_detect: true
   });
 }
 
-// VanillaTilt init (library already loaded)
+// ========= NEW: Tilt =========
 function initTilt() {
   if (typeof VanillaTilt === "undefined") return;
   const cards = document.querySelectorAll(".tilt-card");
@@ -289,12 +305,11 @@ function initTilt() {
   });
 }
 
-// SFX click/hover using clickSound
+// ========= NEW: SFX =========
 function initSfx() {
   const clickSound = document.getElementById('clickSound');
   if (!clickSound) return;
 
-  // Click
   document.querySelectorAll('.sfx-click').forEach(el => {
     if (el.dataset.sfxBound) return;
     el.dataset.sfxBound = "1";
@@ -308,7 +323,6 @@ function initSfx() {
     });
   });
 
-  // Hover (optional subtle)
   document.querySelectorAll('.sfx-hover').forEach(el => {
     if (el.dataset.sfxHoverBound) return;
     el.dataset.sfxHoverBound = "1";
@@ -321,4 +335,91 @@ function initSfx() {
       } catch (e) {}
     });
   });
+}
+
+// ========= NEW: Scroll DNA progress =========
+function initScrollDNA() {
+  const dna = document.getElementById('scroll-dna');
+  if (!dna) return;
+
+  function update() {
+    const doc = document.documentElement;
+    const scrollTop = doc.scrollTop || document.body.scrollTop;
+    const scrollHeight = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
+    const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    dna.style.height = `${Math.min(100, Math.max(0, pct))}%`;
+  }
+
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+}
+
+// ========= NEW: Navbar auto-hide + solid on scroll =========
+function initNavbarBehavior() {
+  const nav = document.getElementById('main-nav');
+  if (!nav) return;
+
+  let lastY = window.scrollY;
+  function onScroll() {
+    const y = window.scrollY;
+
+    // solid/blur stronger when scrolling
+    if (y > 30) nav.classList.add('nav-scrolled');
+    else nav.classList.remove('nav-scrolled');
+
+    // auto hide/show
+    if (y > lastY && y > 120) {
+      nav.style.transform = "translateY(-120%)";
+    } else {
+      nav.style.transform = "translateY(0)";
+    }
+    lastY = y;
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
+
+// ========= NEW: Back to top =========
+function initBackToTop() {
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+
+  function toggle() {
+    if (window.scrollY > 500) btn.classList.remove('hidden');
+    else btn.classList.add('hidden');
+  }
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  window.addEventListener('scroll', toggle, { passive: true });
+  toggle();
+}
+
+// ========= NEW: keyboard shortcuts =========
+function initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") closeCheckout();
+
+    if (e.key.toLowerCase() === "m") toggleMusic();
+  });
+}
+
+// ========= NEW: pricing persistence =========
+function initPricingPersistence() {
+  const p = document.getElementById('projectType');
+  const a = document.getElementById('addonType');
+  if (!p || !a) return;
+
+  try {
+    const sp = localStorage.getItem("mk2_projectType");
+    const sa = localStorage.getItem("mk2_addonType");
+    if (sp !== null) p.value = String(Number(sp));
+    if (sa !== null) a.value = String(Number(sa));
+  } catch (e) {}
+
+  calcPrice();
 }
