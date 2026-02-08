@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>JASA KIMJONG | SINGULARITY</title>
+  <title>JASA KIMJONG | NEURAL LINK</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
@@ -18,8 +18,8 @@
 
   <!-- SELF DESTRUCT OVERLAY -->
   <div id="destruct-overlay" class="fixed inset-0 z-[999999] pointer-events-none bg-black opacity-0 transition-opacity duration-100 flex items-center justify-center overflow-hidden">
-    <div class="absolute inset-0 bg-red-500/10 animate-pulse"></div>
-    <div class="text-red-600 font-orbitron text-9xl font-black animate-bounce opacity-20">SYSTEM FAILURE</div>
+    <div class="absolute inset-0 bg-red-500/20 animate-pulse"></div>
+    <div class="text-red-600 font-orbitron text-9xl font-black animate-bounce opacity-20 tracking-widest">SYSTEM BREACH</div>
     <div class="crack-line-1"></div><div class="crack-line-2"></div><div class="crack-line-3"></div>
   </div>
 
@@ -40,12 +40,12 @@
         <div class="absolute inset-0 flex items-center justify-center bg-black/50" id="cam-overlay">
           <svg class="w-12 h-12 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
         </div>
-        <div class="absolute bottom-2 text-[9px] font-mono text-cyan-400 tracking-widest" id="cam-status">INITIALIZING...</div>
+        <div class="absolute bottom-2 text-[9px] font-mono text-cyan-400 tracking-widest" id="cam-status">INITIALIZING NEURAL LINK...</div>
       </div>
     </div>
 
     <h1 class="text-3xl md:text-5xl font-orbitron font-black text-white tracking-widest drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] mb-2 glitch-text" data-text="JASA KIMJONG">JASA KIMJONG</h1>
-    <div class="text-cyan-500 font-mono text-[10px] tracking-[0.3em] mb-6 animate-pulse">/// SENTIENT AI ONLINE ///</div>
+    <div class="text-cyan-500 font-mono text-[10px] tracking-[0.3em] mb-6 animate-pulse">/// BIOMETRIC AUTH REQUIRED ///</div>
     
     <div class="w-72 h-1 bg-gray-900 rounded-full overflow-hidden border border-cyan-900 mb-4">
       <div id="boot-bar" class="h-full bg-cyan-500 w-0 shadow-[0_0_20px_#06b6d4] transition-all duration-[3000ms] ease-out"></div>
@@ -71,9 +71,9 @@
     <div class="fixed top-24 left-6 z-[8000] flex-col items-start gap-1 hidden md:flex">
       <div class="flex items-center gap-2 bg-cyan-900/20 border border-cyan-500/30 px-3 py-1 rounded backdrop-blur-sm">
         <div class="w-2 h-2 bg-cyan-500 rounded-full animate-ping"></div>
-        <span class="text-[9px] font-mono text-cyan-400 tracking-widest" id="sat-status">SAT_UPLINK: SECURE</span>
+        <span class="text-[9px] font-mono text-cyan-400 tracking-widest" id="sat-status">NEURAL_LINK: ACTIVE</span>
       </div>
-      <!-- Resource Monitor (NEW) -->
+      <!-- Resource Monitor -->
       <div class="mt-1 flex gap-2 text-[8px] font-mono">
         <span class="text-green-400">CPU: <span id="cpu-load">0%</span></span>
         <span class="text-blue-400">MEM: <span id="mem-load">0%</span></span>
@@ -88,7 +88,9 @@
     <div id="particles-js" class="fixed inset-0 z-[0] pointer-events-none opacity-30 parallax-layer" data-speed="0.02"></div>
     <canvas id="matrix-canvas" class="fixed inset-0 z-[1] opacity-15 pointer-events-none parallax-layer" data-speed="0.05"></canvas>
     <canvas id="trail-canvas" class="fixed inset-0 z-[2] pointer-events-none"></canvas>
-    <canvas id="audio-vis" class="fixed bottom-0 left-0 w-full h-32 z-[3] pointer-events-none opacity-40"></canvas>
+    <!-- NEW: Neural Hologram Canvas -->
+    <canvas id="neural-canvas" class="fixed inset-0 z-[3] pointer-events-none"></canvas>
+    <canvas id="audio-vis" class="fixed bottom-0 left-0 w-full h-32 z-[4] pointer-events-none opacity-40"></canvas>
     <div class="fixed inset-0 z-[0] pointer-events-none opacity-20 perspective-grid"></div>
 
     <!-- Terminal Log -->

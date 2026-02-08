@@ -14,7 +14,7 @@ const themes = {
   red: { neon: '#ef4444', bg: '#100505' }
 };
 
-// Audio Context for Visualizer
+// Audio Context
 let audioContext, analyser, dataArray, source;
 
 window.addEventListener('load', async () => {
@@ -26,21 +26,23 @@ window.addEventListener('load', async () => {
   initTerminalLog();
   initGlitchEffect();
   
-  // NEW FEATURES
+  // FEATURES
   initMouseTrail();
-  initVoiceCommand();
   initScreenshotShortcut();
   initClickExplosion();
   initEyeTracking();
   initTypingSound();
   initKonamiCode();
-  initDestroyCode(); // NEW
+  initDestroyCode(); 
   initParallax();
   initCryptoTicker();
-  initWeatherSystem(); // NEW
-  initResourceMonitor(); // NEW
-  initAudioVisualizer(); // NEW
-  initChatbot(); // Enhanced with Memory
+  initWeatherSystem();
+  initResourceMonitor();
+  initAudioVisualizer();
+  initChatbot();
+  
+  // NEW: Neural Link Hologram
+  initNeuralLink();
   
   await initFaceAuth(); 
 
@@ -52,14 +54,153 @@ window.addEventListener('load', async () => {
   initPricingPersistence();
 });
 
-// ========= NEW: SELF DESTRUCT SEQUENCE =========
+// ========= NEW: NEURAL LINK HOLOGRAM =========
+function initNeuralLink() {
+  const canvas = document.getElementById('neural-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  let particles = [];
+  const particleCount = 60;
+  const connectionDistance = 150;
+  let mouse = { x: null, y: null, radius: 200 };
+
+  window.addEventListener('mousemove', (e) => {
+    mouse.x = e.x;
+    mouse.y = e.y;
+  });
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.vx = (Math.random() - 0.5) * 1;
+      this.vy = (Math.random() - 0.5) * 1;
+      this.size = Math.random() * 2 + 1;
+      this.baseX = this.x;
+      this.baseY = this.y;
+      this.density = (Math.random() * 30) + 1;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Bounce edges
+      if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+      // Mouse interaction
+      let dx = mouse.x - this.x;
+      let dy = mouse.y - this.y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+      let forceDirectionX = dx / distance;
+      let forceDirectionY = dy / distance;
+      let maxDistance = mouse.radius;
+      let force = (maxDistance - distance) / maxDistance;
+      let directionX = forceDirectionX * force * this.density;
+      let directionY = forceDirectionY * force * this.density;
+
+      if (distance < mouse.radius) {
+        this.x -= directionX;
+        this.y -= directionY;
+      } else {
+        if (this.x !== this.baseX) {
+          let dx = this.x - this.baseX;
+          this.x -= dx / 10;
+        }
+        if (this.y !== this.baseY) {
+          let dy = this.y - this.baseY;
+          this.y -= dy / 10;
+        }
+      }
+    }
+    draw() {
+      const style = getComputedStyle(document.documentElement);
+      const color = style.getPropertyValue('--neon').trim() || '#06b6d4';
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function init() {
+    particles = [];
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const style = getComputedStyle(document.documentElement);
+    const color = style.getPropertyValue('--neon').trim() || '#06b6d4';
+    
+    for (let i = 0; i < particles.length; i++) {
+      particles[i].update();
+      particles[i].draw();
+      
+      // Draw connections
+      for (let j = i; j < particles.length; j++) {
+        let dx = particles[i].x - particles[j].x;
+        let dy = particles[i].y - particles[j].y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < connectionDistance) {
+          ctx.beginPath();
+          let opacity = 1 - (distance / connectionDistance);
+          ctx.strokeStyle = `rgba(${hexToRgb(color)}, ${opacity * 0.5})`;
+          ctx.lineWidth = 1;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+      
+      // Connect to mouse
+      if (mouse.x != null) {
+        let dx = particles[i].x - mouse.x;
+        let dy = particles[i].y - mouse.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < mouse.radius) {
+          ctx.beginPath();
+          let opacity = 1 - (distance / mouse.radius);
+          ctx.strokeStyle = `rgba(${hexToRgb(color)}, ${opacity})`;
+          ctx.lineWidth = 1;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '6, 182, 212';
+  }
+
+  init();
+  animate();
+}
+
+// ========= SELF DESTRUCT =========
 function initDestroyCode() {
   document.addEventListener('keydown', (e) => {
     if (isDestroyed) {
       if (e.key.toLowerCase() === 'r') location.reload();
       return;
     }
-    
     if (e.key.toLowerCase() === destroyCode[destroyIndex]) {
       destroyIndex++;
       if (destroyIndex === destroyCode.length) {
@@ -85,10 +226,9 @@ function triggerSelfDestruct() {
   document.body.style.transform = "rotate(1deg)";
   document.querySelectorAll('.tilt-card').forEach(c => c.style.transform = `rotate(${Math.random()*10-5}deg) scale(0.9)`);
   
-  triggerNotification("⚠️ CRITICAL FAILURE: SYSTEM DESTROYED ⚠️");
+  triggerNotification("⚠️ CRITICAL FAILURE: SYSTEM BREACH ⚠️");
   triggerNotification("PRESS 'R' TO REBOOT");
   
-  // Shake effect
   let shakeInt = setInterval(() => {
     const x = (Math.random() - 0.5) * 20;
     const y = (Math.random() - 0.5) * 20;
@@ -98,38 +238,28 @@ function triggerSelfDestruct() {
   setTimeout(() => clearInterval(shakeInt), 5000);
 }
 
-// ========= NEW: RESOURCE MONITOR =========
+// ========= RESOURCE MONITOR =========
 function initResourceMonitor() {
   const cpuEl = document.getElementById('cpu-load');
   const memEl = document.getElementById('mem-load');
   if (!cpuEl || !memEl) return;
-
   setInterval(() => {
-    // Simulate CPU/Memory usage based on activity (Real API not available in pure JS without extension)
-    // We simulate based on random fluctuation + particle count
     const baseCpu = 10 + Math.random() * 15;
     const baseMem = 20 + Math.random() * 10;
-    
     cpuEl.innerText = Math.floor(baseCpu) + "%";
     memEl.innerText = Math.floor(baseMem) + "%";
-    
-    // Color change if high
     if (baseCpu > 20) cpuEl.classList.add('text-red-500'); else cpuEl.classList.remove('text-red-500');
   }, 2000);
 }
 
-// ========= NEW: WEATHER SYSTEM =========
+// ========= WEATHER SYSTEM =========
 async function initWeatherSystem() {
   const display = document.getElementById('weather-display');
   if (!display) return;
-
   try {
-    // Using ipapi.co for location (Free, no key needed for basic)
     const locRes = await fetch('https://ipapi.co/json/');
     const locData = await locRes.json();
     const city = locData.city;
-    
-    // Using Open-Meteo for weather (Free, no key)
     const lat = locData.latitude;
     const lon = locData.longitude;
     const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
@@ -146,22 +276,12 @@ async function initWeatherSystem() {
     if (code > 90) condition = "Storm";
 
     display.innerText = `${city}: ${temp}°C (${condition})`;
-    
-    // Change particles based on weather
-    const pjs = document.getElementById('particles-js');
-    if (condition === "Rain") {
-       // In a full implementation, we'd reload particles with rain config
-       document.body.style.filter = "hue-rotate(180deg) brightness(0.8)";
-    } else {
-       document.body.style.filter = "none";
-    }
-
   } catch (e) {
     display.innerText = "WEATHER: OFFLINE";
   }
 }
 
-// ========= NEW: AUDIO VISUALIZER =========
+// ========= AUDIO VISUALIZER =========
 function initAudioVisualizer() {
   const canvas = document.getElementById('audio-vis');
   if (!canvas) return;
@@ -176,7 +296,6 @@ function initAudioVisualizer() {
     canvas.height = 128;
   });
 
-  // Init Audio Context on first user interaction (browser policy)
   document.addEventListener('click', () => {
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -194,30 +313,24 @@ function initAudioVisualizer() {
 
 function drawVisualizer(ctx, analyser, dataArray, bufferLength) {
   requestAnimationFrame(() => drawVisualizer(ctx, analyser, dataArray, bufferLength));
-  
   analyser.getByteFrequencyData(dataArray);
-  
-  ctx.fillStyle = 'rgba(2, 2, 2, 0.2)'; // Fade effect
+  ctx.fillStyle = 'rgba(2, 2, 2, 0.2)';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  
   const barWidth = (ctx.canvas.width / bufferLength) * 2.5;
   let barHeight;
   let x = 0;
-  
   const style = getComputedStyle(document.documentElement);
   const color = style.getPropertyValue('--neon').trim() || '#06b6d4';
 
   for(let i = 0; i < bufferLength; i++) {
     barHeight = dataArray[i] / 2;
-    
     ctx.fillStyle = color;
     ctx.fillRect(x, ctx.canvas.height - barHeight, barWidth, barHeight);
-    
     x += barWidth + 1;
   }
 }
 
-// ========= NEW: AI MEMORY CHATBOT =========
+// ========= AI MEMORY CHATBOT =========
 function initChatbot() {
   const btn = document.getElementById('chatbot-btn');
   const modal = document.getElementById('chatbot-modal');
@@ -228,7 +341,6 @@ function initChatbot() {
 
   if(!btn) return;
 
-  // Load Memory
   const userName = localStorage.getItem('kimjong_user_name');
   
   btn.addEventListener('click', () => {
@@ -255,14 +367,11 @@ function initChatbot() {
 
   function getResponse(msg) {
     msg = msg.toLowerCase();
-    
-    // Check for name
     if (!userName && (msg.includes('nama saya') || msg.includes('saya '))) {
       const name = msg.split('saya ')[1] || msg.split('nama saya ')[1] || "User";
       saveName(name);
       return `Senang bertemu Anda, ${name}.`;
     }
-
     if (msg.includes('harga') || msg.includes('biaya')) return "Harga mulai dari Rp 75.000 hingga Rp 500.000. Cek menu Pricing.";
     if (msg.includes('web')) return "Web Nexus termasuk hosting gratis 1 tahun. Harga Rp 350.000.";
     if (msg.includes('bot')) return "Bot Sentry untuk auto-reply & manage grup. Harga Rp 150.000.";
@@ -270,7 +379,6 @@ function initChatbot() {
     if (msg.includes('kontak') || msg.includes('wa')) return "Klik tombol 'Kirim WA' di menu Pricing.";
     if (msg.includes('cuaca')) return "Saya mendeteksi cuaca lokal Anda di ticker atas.";
     if (msg.includes('hancur') || msg.includes('rusak')) return "Jangan coba-coba mengetik X-X-X...";
-    
     return "Maaf, saya belum paham. Coba tanya tentang 'harga', 'nama', atau 'cuaca'.";
   }
 
@@ -279,7 +387,6 @@ function initChatbot() {
     if (!val) return;
     addMessage(val, 'user');
     input.value = '';
-    
     setTimeout(() => {
       addMessage("...", 'ai');
       setTimeout(() => {
@@ -293,25 +400,22 @@ function initChatbot() {
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleSend(); });
 }
 
-// ... (Paste all other functions from previous version here: FaceAuth, Parallax, Crypto, Konami, GodMode, MouseTrail, Explosion, EyeTracking, TypingSound, Matrix, Satellite, Countdown, Glitch, Terminal, Voice, Screenshot, Checkout, CalcPrice, Audio, Sfx, Particles, Tilt, Scroll, Nav, BackToTop, Keyboard, Persistence) ...
-// For brevity, ensuring critical logic is present. Assume previous helper functions exist.
-
+// ... (Helper Functions) ...
 function triggerNotification(msg){const s=document.getElementById('sat-status'); if(s){const orig=s.innerText; s.innerText=msg; s.classList.add('text-yellow-400'); setTimeout(()=>{s.innerText=orig;s.classList.remove('text-yellow-400');},2000);}}
 const words=["FUTURE","EMPIRE","LEGACY","SYSTEM"]; let wI=0, cI=0, del=false;
 function initTypewriter() { const el=document.getElementById('hero-type'); if(!el)return; const w=words[wI]; if(del) el.innerText=w.substring(0,cI--); else el.innerText=w.substring(0,cI++); let sp=del?100:200; if(!del&&cI===w.length){sp=2000;del=true;} else if(del&&cI===0){del=false;wI=(wI+1)%words.length;sp=500;} setTimeout(initTypewriter,sp); }
 function initSatellite() { setInterval(() => { const c = document.getElementById('sat-coords'); if(c) c.innerText = `LAT: ${(-6.2+Math.random()*0.01).toFixed(3)} | LON: ${(106.8+Math.random()*0.01).toFixed(3)}`; }, 2000); }
 function startCountdown() { let t=900; setInterval(()=>{ const m=Math.floor(t/60), s=t%60; const d=document.getElementById('countdown'); if(d)d.innerText=`00:${m<10?'0'+m:m}:${s<10?'0'+s:s}`; if(t>0)t--; },1000); }
 function initGlitchEffect() { const el = document.querySelector('.glitch-text'); if (!el) return; setInterval(() => { if (Math.random() > 0.95) { const chars = "XYZ0123!@#"; let iterations = 0; const interval = setInterval(() => { el.innerText = el.dataset.text.split("").map((letter, index) => index < iterations ? el.dataset.text[index] : chars[Math.floor(Math.random() * chars.length)]).join(""); if (iterations >= el.dataset.text.length) clearInterval(interval); iterations += 1/3; }, 30); } }, 2000); }
-function initTerminalLog() { const output = document.getElementById('terminal-output'); if (!output) return; const logs = ["System OK", "Memory Loaded", "Weather Synced", "Audio Active", "Security: HIGH"]; function addLog() { const line = document.createElement('div'); line.innerText = `[${new Date().toLocaleTimeString()}] ${logs[Math.floor(Math.random()*logs.length)]}`; output.appendChild(line); if (output.children.length > 6) output.removeChild(output.firstChild); setTimeout(addLog, Math.random() * 1000 + 500); } addLog(); }
-function initVoiceCommand() { const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SpeechRecognition) return; const recognition = new SpeechRecognition(); recognition.lang = 'id-ID'; recognition.continuous = false; const indicator = document.getElementById('voice-indicator') || document.createElement('div'); recognition.onstart = () => { if(indicator) { indicator.innerText = "🎤 LISTENING..."; indicator.classList.remove('hidden'); } }; recognition.onend = () => { if(indicator) { setTimeout(() => { indicator.innerText = "🎤 SAY: 'BUKA HARGA'"; try { recognition.start(); } catch(e){} }, 2000); } }; recognition.onresult = (event) => { const command = event.results[0][0].transcript.toLowerCase(); if (command.includes('buka harga')) { document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' }); triggerNotification("OPENING PRICING"); } else if (command.includes('buka chat')) { document.getElementById('chatbot-btn').click(); triggerNotification("OPENING CHAT"); } else if (command.includes('musik')) { toggleMusic(); } }; try { recognition.start(); } catch (e) {} }
+function initTerminalLog() { const output = document.getElementById('terminal-output'); if (!output) return; const logs = ["System OK", "Memory Loaded", "Weather Synced", "Audio Active", "Neural Link: ESTABLISHED"]; function addLog() { const line = document.createElement('div'); line.innerText = `[${new Date().toLocaleTimeString()}] ${logs[Math.floor(Math.random()*logs.length)]}`; output.appendChild(line); if (output.children.length > 6) output.removeChild(output.firstChild); setTimeout(addLog, Math.random() * 1000 + 500); } addLog(); }
 function initScreenshotShortcut() { document.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'p') { triggerNotification("CAPTURING SCREEN..."); setTimeout(() => { html2canvas(document.body, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg'), scale: 2 }).then(canvas => { const link = document.createElement('a'); link.download = 'jasa-kimjong-snapshot.png'; link.href = canvas.toDataURL(); link.click(); triggerNotification("SAVED!"); }); }, 500); } }); }
 function initKonamiCode() { document.addEventListener('keydown', (e) => { if (e.key === konamiCode[konamiIndex]) { konamiIndex++; if (konamiIndex === konamiCode.length) { activateGodMode(); konamiIndex = 0; } } else { konamiIndex = 0; } }); }
 function activateGodMode() { if (isGodMode || isDestroyed) return; isGodMode = true; document.body.classList.add('god-mode-active'); document.getElementById('god-mode-indicator').classList.remove('hidden'); document.querySelector('.glitch-text').setAttribute('data-text', 'GOD MODE'); document.querySelector('.glitch-text').innerText = 'GOD MODE'; document.querySelectorAll('.price-tag').forEach(el => { const text = el.innerText; const num = parseInt(text.replace(/[^0-9]/g, '')); if (num) { const newNum = Math.floor(num * 0.5); el.innerText = `Rp ${newNum.toLocaleString('id-ID')} (50% OFF)`; el.classList.add('text-purple-400', 'animate-pulse'); } }); triggerNotification("⚡ GOD MODE ACTIVATED ⚡"); }
-let mouseTrailCtx, mouseTrailCanvas; let particles = [];
+let mouseTrailCtx, mouseTrailCanvas; let explosionParticles = [];
 function initMouseTrail() { mouseTrailCanvas = document.getElementById('trail-canvas'); if (!mouseTrailCanvas) return; mouseTrailCtx = mouseTrailCanvas.getContext('2d'); mouseTrailCanvas.width = window.innerWidth; mouseTrailCanvas.height = window.innerHeight; window.addEventListener('resize', () => { mouseTrailCanvas.width = window.innerWidth; mouseTrailCanvas.height = window.innerHeight; }); const trail = []; const length = 20; document.addEventListener('mousemove', (e) => { trail.push({ x: e.clientX, y: e.clientY, life: 1 }); if (trail.length > length) trail.shift(); }); function animateTrail() { mouseTrailCtx.clearRect(0, 0, mouseTrailCanvas.width, mouseTrailCanvas.height); const isGod = document.body.classList.contains('god-mode-active'); for (let i = 0; i < trail.length; i++) { const point = trail[i]; const size = (i / length) * (isGod ? 8 : 4); const alpha = (i / length); const color = isGod ? `rgba(217, 70, 239, ${alpha})` : `rgba(6, 182, 212, ${alpha})`; mouseTrailCtx.beginPath(); mouseTrailCtx.arc(point.x, point.y, size, 0, Math.PI * 2); mouseTrailCtx.fillStyle = color; mouseTrailCtx.fill(); point.life -= 0.05; } requestAnimationFrame(animateTrail); } animateTrail(); }
 function initClickExplosion() { document.addEventListener('click', (e) => { if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.closest('#chatbot-modal') || isDestroyed) return; const popSound = document.getElementById('popSound'); if(popSound) { popSound.currentTime = 0; popSound.volume = 0.3; popSound.play().catch(()=>{}); } createExplosion(e.clientX, e.clientY); }); }
-function createExplosion(x, y) { const isGod = document.body.classList.contains('god-mode-active'); const count = isGod ? 40 : 20; for (let i = 0; i < count; i++) { particles.push({ x: x, y: y, vx: (Math.random() - 0.5) * (isGod ? 20 : 10), vy: (Math.random() - 0.5) * (isGod ? 20 : 10), life: 1, color: isGod ? `hsl(${Math.random() * 60 + 280}, 100%, 50%)` : `hsl(${Math.random() * 60 + 160}, 100%, 50%)` }); } }
-function animateExplosions() { if (!mouseTrailCtx) return; for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.02; if (p.life <= 0) { particles.splice(i, 1); continue; } mouseTrailCtx.beginPath(); mouseTrailCtx.arc(p.x, p.y, 2, 0, Math.PI * 2); mouseTrailCtx.fillStyle = p.color; mouseTrailCtx.globalAlpha = p.life; mouseTrailCtx.fill(); mouseTrailCtx.globalAlpha = 1; } requestAnimationFrame(animateExplosions); }
+function createExplosion(x, y) { const isGod = document.body.classList.contains('god-mode-active'); const count = isGod ? 40 : 20; for (let i = 0; i < count; i++) { explosionParticles.push({ x: x, y: y, vx: (Math.random() - 0.5) * (isGod ? 20 : 10), vy: (Math.random() - 0.5) * (isGod ? 20 : 10), life: 1, color: isGod ? `hsl(${Math.random() * 60 + 280}, 100%, 50%)` : `hsl(${Math.random() * 60 + 160}, 100%, 50%)` }); } }
+function animateExplosions() { if (!mouseTrailCtx) return; for (let i = explosionParticles.length - 1; i >= 0; i--) { const p = explosionParticles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.02; if (p.life <= 0) { explosionParticles.splice(i, 1); continue; } mouseTrailCtx.beginPath(); mouseTrailCtx.arc(p.x, p.y, 2, 0, Math.PI * 2); mouseTrailCtx.fillStyle = p.color; mouseTrailCtx.globalAlpha = p.life; mouseTrailCtx.fill(); mouseTrailCtx.globalAlpha = 1; } requestAnimationFrame(animateExplosions); }
 setTimeout(() => { if(mouseTrailCtx) animateExplosions(); }, 1000);
 function initEyeTracking() { const cursor = document.getElementById('cursor-hud'); const leftEye = cursor?.querySelector('.eye.left'); const rightEye = cursor?.querySelector('.eye.right'); if (!cursor || !leftEye || !rightEye) return; document.addEventListener('mousemove', (e) => { const x = e.clientX; const y = e.clientY; cursor.style.left = x + 'px'; cursor.style.top = y + 'px'; const moveX = (x - window.innerWidth / 2) / 50; const moveY = (y - window.innerHeight / 2) / 50; leftEye.style.transform = `translate(${moveX}px, ${moveY}px)`; rightEye.style.transform = `translate(${moveX}px, ${moveY}px)`; }); }
 function initTypingSound() { const keySound = document.getElementById('keySound'); if (!keySound) return; document.addEventListener('keydown', (e) => { if (e.target.classList.contains('typing-input') || e.target.tagName === 'TEXTAREA') { const rate = 0.8 + Math.random() * 0.4; keySound.playbackRate = rate; keySound.volume = 0.4; keySound.currentTime = 0; keySound.play().catch(() => {}); } }); }
@@ -397,7 +501,6 @@ function enterSystem(bootScreen, mainContent, bootSound) {
     document.getElementById('chatbot-btn').classList.remove('hidden');
     initTypewriter();
     bindCursorHoverTargets();
-    if(document.getElementById('voice-indicator')) document.getElementById('voice-indicator').classList.remove('hidden');
   }, 800);
 }
 function initParallax() {
