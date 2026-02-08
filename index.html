@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JASA KIMJONG | THE APEX</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Rajdhani:wght@600;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#020202] text-gray-300 font-rajdhani overflow-x-hidden selection:bg-cyan-500 selection:text-black cursor-none pt-10" oncontextmenu="return false;">
+
+    <canvas id="matrix-canvas" class="fixed inset-0 z-[1] opacity-20 pointer-events-none"></canvas>
+
+    <div class="fixed top-20 left-6 z-[8000] flex flex-col items-start gap-1 hidden md:flex">
+        <div class="flex items-center gap-2 bg-cyan-900/20 border border-cyan-500/30 px-3 py-1 rounded backdrop-blur-sm">
+            <div class="w-2 h-2 bg-cyan-500 rounded-full animate-ping"></div>
+            <span class="text-[9px] font-mono text-cyan-400 tracking-widest" id="sat-status">SAT_UPLINK: STABLE</span>
+        </div>
+        <div class="h-[1px] w-full bg-cyan-500/30"></div>
+        <div class="text-[8px] font-mono text-gray-500" id="sat-coords">LAT: -6.200 | LON: 106.845</div>
+    </div>
+
+    <div class="fixed top-20 right-6 z-[8000] flex items-center gap-2 bg-red-900/20 border border-red-500/30 px-3 py-1 rounded backdrop-blur-sm">
+        <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+        <span class="text-[10px] font-mono text-red-400 tracking-widest">REC <span id="rec-timer">00:00:00</span></span>
+    </div>
+
+    <div class="fixed top-0 left-0 w-full bg-gradient-to-r from-red-900 to-black border-b border-red-500/50 z-[9000] py-2 px-4 flex justify-between items-center shadow-[0_0_20px_rgba(255,0,0,0.3)]">
+        <div class="flex items-center gap-2 animate-pulse">
+            <span class="text-red-500 font-bold text-xs">⚠️ HIGH DEMAND:</span>
+            <span class="text-[10px] text-white">HARGA NAIK DALAM</span>
+        </div>
+        <div id="countdown" class="font-mono font-black text-red-400 text-xs tracking-widest">00:15:00</div>
+    </div>
+
+    <div id="boot-screen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center font-mono bg-black text-center px-4 perspective-container">
+        <div id="boot-profile-container" class="relative mb-12 cursor-grab active:cursor-grabbing">
+            <div class="absolute inset-[-20px] border-2 border-dashed border-cyan-500/30 rounded-full animate-spin-slow pointer-events-none"></div>
+            <div class="absolute inset-[-10px] border border-cyan-500/50 rounded-full animate-reverse-spin pointer-events-none"></div>
+            <div id="profile-3d-card" class="relative w-48 h-48 md:w-56 md:h-56 rounded-full p-2 bg-[#0a0a0a] border-[3px] border-cyan-500 shadow-[0_0_60px_rgba(6,182,212,0.6)] overflow-hidden">
+                <img src="https://files.catbox.moe/2qzuad.jpg" class="w-full h-full rounded-full object-cover scale-105 pointer-events-none" alt="Kimjong Profile">
+                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-full"></div>
+            </div>
+        </div>
+        
+        <h1 class="text-5xl md:text-7xl font-orbitron font-black text-white tracking-[0.1em] drop-shadow-[0_0_25px_rgba(6,182,212,1)] mb-4 glitch" data-text="JASA KIMJONG">JASA KIMJONG</h1>
+        <div class="text-cyan-500/80 text-xs md:text-sm font-mono tracking-[0.4em] mb-10 animate-pulse">/// SYSTEM_OVERRIDE // WELCOME</div>
+        
+        <div class="w-72 h-[2px] bg-gray-900 relative overflow-hidden mb-10">
+            <div id="boot-bar" class="h-full bg-cyan-400 w-0 shadow-[0_0_20px_#06b6d4]"></div>
+        </div>
+        
+        <button id="start-btn" class="hidden relative border-2 border-cyan-500 text-cyan-400 px-16 py-4 hover:bg-cyan-500 hover:text-black transition-all duration-300 uppercase tracking-[0.25em] text-sm font-bold sfx-click bg-black/90 backdrop-blur-xl shadow-[0_0_30px_rgba(6,182,212,0.3)] overflow-hidden group">
+            <span class="relative z-10 group-hover:text-black transition">INITIALIZE</span>
+            <div class="absolute inset-0 bg-cyan-500 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+        </button>
+    </div>
+
+    <div id="particles-js" class="fixed inset-0 z-0 opacity-40 pointer-events-none"></div>
+    <div class="grid-overlay fixed inset-0 z-0 opacity-20 pointer-events-none"></div>
+    <div class="vignette fixed inset-0 z-[8000] pointer-events-none"></div>
+
+    <div id="cursor-hud" class="fixed pointer-events-none z-[100000] hidden md:block mix-blend-difference">
+        <div class="crosshair-center bg-cyan-500"></div>
+        <div class="crosshair-circle border-cyan-500"></div>
+    </div>
+
+    <div class="fixed top-28 left-6 z-30 hidden md:block w-64 bg-black/80 border-l-2 border-cyan-500 p-4 rounded-r font-mono text-[10px] backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.1)] hover:pl-6 transition-all duration-300">
+        <div class="flex justify-between mb-3 border-b border-white/10 pb-1"><span class="text-cyan-400 font-bold tracking-widest">SYSTEM_CORE</span><span class="animate-pulse text-green-500">● LIVE</span></div>
+        <div class="space-y-2">
+            <div class="flex justify-between text-gray-400"><span>CPU LOAD</span><span id="cpu-val" class="text-white">12%</span></div>
+            <div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden"><div id="cpu-bar" class="h-full bg-cyan-500 w-[12%] transition-all duration-500 shadow-[0_0_5px_var(--neon)]"></div></div>
+            <div class="flex justify-between text-gray-400 mt-2"><span>ACTIVE NODES</span><span class="text-cyan-500 font-bold" id="node-count">142</span></div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-6 left-6 z-30 bg-black/90 border border-gray-800 p-3 rounded font-mono text-[9px] text-gray-400 w-48 shadow-lg hidden md:block">
+        <div class="border-b border-gray-800 pb-1 mb-2 text-cyan-500 font-bold">CONNECTION_TRACE</div>
+        <div id="geo-log" class="space-y-1"><div>> INIT PROTOCOL...</div></div>
+    </div>
+
+    <div class="fixed bottom-36 left-6 z-30 hidden md:block bg-black/80 border border-cyan-500/30 p-2 rounded backdrop-blur-md">
+        <div class="text-[9px] font-mono text-cyan-500 mb-1">NETWORK LATENCY (MS)</div>
+        <canvas id="latencyChart" width="150" height="40"></canvas>
+    </div>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="hoverSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="bootSound" src="https://assets.mixkit.co/active_storage/sfx/2044/2044-preview.mp3"></audio>
+    <audio id="chaChing" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+    <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2865/2865-preview.mp3"></audio>
+    <audio id="accessSound" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+    <audio id="destructSound" src="https://assets.mixkit.co/active_storage/sfx/2865/2865-preview.mp3"></audio>
+    <audio id="scanSound" src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3"></audio>
+    <audio id="deniedSound" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+    <audio id="bgMusic" src="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Rolemusic/gigs_n_contest/Rolemusic_-_02_-_The_White_Kitty.mp3" loop></audio>
+
+    <nav id="main-nav" style="display: none;" class="fixed w-full z-40 top-12 p-4 transition-all duration-300 animate-fade-in-down">
+        <div class="flex justify-between items-center max-w-7xl mx-auto bg-black/80 backdrop-blur-md border border-white/5 px-6 py-3 rounded-full shadow-lg clip-nav">
+            <span ondblclick="triggerGodMode()" class="text-xl font-black text-white tracking-widest flex items-center gap-2 cursor-pointer group sfx-hover select-none">
+                <div class="w-2 h-2 bg-cyan-400 rounded-full group-hover:animate-ping shadow-[0_0_10px_var(--neon)]"></div>
+                JASA<span class="text-cyan-600">KIMJONG</span>
+            </span>
+            <div class="flex gap-3">
+                <button onclick="startVoice()" class="hidden md:flex items-center justify-center w-8 h-8 rounded-full border border-gray-700 hover:border-cyan-500 hover:text-cyan-500 transition text-gray-500"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button>
+                <button onclick="initDestruct()" class="flex items-center justify-center w-8 h-8 rounded-full border border-red-900 hover:bg-red-600 hover:text-black hover:border-red-600 transition text-red-700" title="DO NOT PRESS">⚠️</button>
+                <button onclick="openCmd()" class="hidden md:flex items-center gap-2 text-[10px] text-gray-500 border border-gray-800 px-3 py-2 rounded hover:text-cyan-500 hover:border-cyan-500 transition"><span>⌘ CMD</span></button>
+                <button onclick="document.getElementById('pricing').scrollIntoView()" class="bg-cyan-500/10 border border-cyan-500 text-cyan-400 text-[10px] font-bold px-6 py-2 hover:bg-cyan-500 hover:text-black transition uppercase tracking-widest sfx-click clip-button">DEPLOY</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="fixed right-0 top-0 w-1 h-full z-[8000] bg-gray-900/50"><div id="scroll-dna" class="w-full bg-cyan-500 shadow-[0_0_15px_#06b6d4] transition-all duration-100 ease-out" style="height: 0%"></div></div>
+
+    <div id="voice-hud" class="fixed top-24 right-6 z-[9000] hidden items-center gap-3 bg-black/80 border border-cyan-500 px-4 py-2 rounded-full backdrop-blur-md"><div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div><span class="text-cyan-500 font-mono text-xs">LISTENING... SAY "OPEN PRICING"</span></div>
+
+    <div id="cmd-modal" class="fixed inset-0 z-[13000] hidden items-start justify-center pt-32 bg-black/80 backdrop-blur-sm" onclick="closeCmd(event)">
+        <div class="w-full max-w-2xl bg-[#0a0a0a] border border-cyan-500/50 rounded-lg shadow-[0_0_50px_rgba(6,182,212,0.2)] overflow-hidden transform transition-all scale-95 opacity-0" id="cmd-box">
+            <div class="flex items-center border-b border-gray-800 p-4"><span class="text-cyan-500 mr-3 text-xl">›</span><input type="text" id="cmd-input" placeholder="Type a command (Try: 'Buy', 'Music', 'Hack')..." class="w-full bg-transparent text-white font-mono outline-none text-lg uppercase" autocomplete="off" onkeyup="filterCmd()"><span class="text-xs text-gray-600 border border-gray-700 px-2 py-1 rounded">ESC</span></div>
+            <div class="max-h-64 overflow-y-auto p-2 space-y-1" id="cmd-results"></div>
+            <div class="bg-gray-900/50 p-2 text-[10px] text-gray-500 flex justify-between font-mono"><span>JASA KIMJONG OS v48.0</span><span>CTRL + K to Toggle</span></div>
+        </div>
+    </div>
+
+    <div id="sleep-mode" class="fixed inset-0 z-[12000] bg-black/80 pointer-events-none opacity-0 transition-opacity duration-1000 flex items-center justify-center"><div class="text-cyan-500 font-mono text-xs animate-pulse">SYSTEM IDLE // ENERGY SAVING ACTIVE</div></div>
+
+    <div class="relative pt-40 pb-20 text-center px-4 relative z-10 min-h-screen flex flex-col justify-center items-center">
+        <h1 class="text-6xl md:text-9xl font-black text-white mb-6 leading-none tracking-tighter drop-shadow-[0_0_30px_rgba(6,182,212,0.5)]">WE BUILD <br><span class="text-transparent bg-clip-text bg-gradient-to-b from-cyan-400 to-blue-900 type-text" id="hero-type">FUTURE</span><span class="animate-blink text-cyan-500">|</span></h1>
+        <p class="text-cyan-200/60 text-sm md:text-lg max-w-xl mx-auto font-mono leading-relaxed mb-10">Hentikan cara manual. Gunakan <span class="text-white font-bold">Automasi Digital</span> untuk mendominasi pasar.</p>
+        <div class="flex flex-col md:flex-row gap-4">
+            <button onclick="document.getElementById('pricing').scrollIntoView()" class="bg-cyan-500 text-black font-black px-12 py-4 hover:bg-white hover:scale-105 transition shadow-[0_0_40px_rgba(6,182,212,0.4)] uppercase tracking-widest text-sm clip-button sfx-click relative overflow-hidden"><span class="relative z-10">START REVOLUTION</span></button>
+            <button onclick="openQR()" class="border border-cyan-500/50 text-cyan-400 font-bold px-8 py-4 hover:bg-cyan-900/30 transition uppercase tracking-widest text-sm clip-button sfx-click flex items-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h6v6H3V3zm12 0h6v6h-6V3zM3 15h6v6H3v-6zm12 0h6v6h-6v-6zM5 5v2h2V5H5zm12 0v2h2V5h-2zM5 17v2h2v-2H5zm12 0v2h2v-2h-2z"/></svg>SCAN PAYMENT</button>
+        </div>
+        <div id="testimonial-trigger" class="mt-12 w-full max-w-2xl bg-black/50 border border-white/5 p-4 rounded-lg backdrop-blur text-left flex gap-3"><div class="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 overflow-hidden"><img src="https://i.pravatar.cc/100?img=3" alt="Client" class="w-full h-full"></div><div><div class="text-[10px] text-gray-400 font-bold mb-1">CLIENT_ID: 882 (Verified)</div><div class="text-xs font-mono text-cyan-400 h-10" id="typing-testi"></div></div></div>
+    </div>
+
+    <div id="services" class="py-24 relative z-20 border-t border-white/5 bg-black/80 backdrop-blur-sm group/container">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-cyan-700 text-xs font-mono mb-16 text-center uppercase tracking-[0.5em]">/// NEURAL_MODULES</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="tilt-card bg-[#080808] border border-gray-800 p-8 relative group hover:border-cyan-500 transition duration-500 sfx-hover overflow-hidden hover:z-50 hover:scale-105 focus-card" data-tilt onclick="openCheckout('WEB STORE', 350000)">
+                    <div class="absolute -right-4 -top-4 text-cyan-900/20 font-black text-8xl font-orbitron group-hover:text-cyan-500/10 transition">01</div><div class="text-cyan-500 text-4xl mb-4">🌐</div><h3 class="text-white font-bold text-xl mb-2 font-orbitron group-hover:text-cyan-400">WEB NEXUS</h3><p class="text-gray-500 text-xs font-mono mb-4">Web Landing Page Premium.</p><div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden mb-1"><div class="h-full bg-cyan-500 w-[85%]"></div></div><div class="text-[9px] text-cyan-500 font-mono text-right">LOAD: 85%</div><div class="mt-4 text-white font-bold font-mono text-xl price-scramble" data-final="Rp 350.000">Rp ???.???</div>
+                </div>
+                <div class="tilt-card bg-[#080808] border border-gray-800 p-8 relative group hover:border-gold transition duration-500 sfx-hover overflow-hidden hover:z-50 hover:scale-105 focus-card" data-tilt onclick="openCheckout('BOT MANAGER', 150000)">
+                    <div class="absolute -right-4 -top-4 text-yellow-900/20 font-black text-8xl font-orbitron group-hover:text-gold/10 transition">02</div><div class="text-gold text-4xl mb-4">🤖</div><h3 class="text-white font-bold text-xl mb-2 font-orbitron group-hover:text-gold">BOT SENTRY</h3><p class="text-gray-500 text-xs font-mono mb-4">Bot Telegram Admin & Broadcast.</p><div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden mb-1"><div class="h-full bg-gold w-[92%]"></div></div><div class="text-[9px] text-gold font-mono text-right">LOAD: 92%</div><div class="mt-4 text-white font-bold font-mono text-xl price-scramble" data-final="Rp 150.000">Rp ???.???</div>
+                </div>
+                <div class="tilt-card bg-[#080808] border border-gray-800 p-8 relative group hover:border-red-500 transition duration-500 sfx-hover overflow-hidden hover:z-50 hover:scale-105 focus-card" data-tilt onclick="openCheckout('PYTHON SCRIPT', 75000)">
+                    <div class="absolute -right-4 -top-4 text-red-900/20 font-black text-8xl font-orbitron group-hover:text-red-500/10 transition">03</div><div class="text-red-500 text-4xl mb-4">🐍</div><h3 class="text-white font-bold text-xl mb-2 font-orbitron group-hover:text-red-500">CODE INJECT</h3><p class="text-gray-500 text-xs font-mono mb-4">Python Script Custom.</p><div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden mb-1"><div class="h-full bg-red-500 w-[60%]"></div></div><div class="text-[9px] text-red-500 font-mono text-right">LOAD: 60%</div><div class="mt-4 text-white font-bold font-mono text-xl price-scramble" data-final="Rp 75.000+">Rp ??.???</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pricing" class="py-24 bg-black relative z-20 border-t border-white/5">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="bg-[#0a0a0a] border border-cyan-500/30 p-10 rounded-xl shadow-[0_0_50px_rgba(6,182,212,0.1)] relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-cyan-500/50 rounded-tl-3xl"></div><div class="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-cyan-500/50 rounded-br-3xl"></div>
+                <h2 class="text-white font-orbitron text-2xl uppercase mb-8 text-center">Protocol <span class="text-cyan-500">Selection</span></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <select id="projectType" onchange="calcPrice()" class="w-full bg-black text-gray-300 border border-gray-700 p-4 text-xs font-mono outline-none focus:border-cyan-500 transition rounded sfx-click hover:bg-gray-900"><option value="0">SELECT_MODULE...</option><option value="150000">BOT TELEGRAM (150K)</option><option value="350000">WEB LANDING PAGE (350K)</option><option value="500000">FULL SYSTEM (500K)</option></select>
+                    <select id="addonType" onchange="calcPrice()" class="w-full bg-black text-gray-300 border border-gray-700 p-4 text-xs font-mono outline-none focus:border-cyan-500 transition rounded sfx-click hover:bg-gray-900"><option value="0">STANDARD SPEED</option><option value="50000">SOURCE CODE (+50K)</option><option value="100000">HOSTING SETUP (+100K)</option></select>
+                </div>
+                <div class="flex justify-between items-center border-t border-gray-800 pt-6">
+                    <div><div class="text-[10px] text-gray-500 font-mono tracking-widest">ESTIMATED COST</div><div class="text-4xl font-mono font-bold text-white text-shadow-cyan" id="totalPrice">Rp 0</div></div>
+                    <button id="bio-btn" onmousedown="startBio()" onmouseup="endBio()" onmouseleave="endBio()" ontouchstart="startBio()" ontouchend="endBio()" class="relative bg-cyan-900/50 border border-cyan-500 text-cyan-400 font-bold px-8 py-4 overflow-hidden group select-none transition-all"><div class="absolute inset-0 bg-cyan-500 w-0 transition-none" id="bio-fill"></div><span class="relative z-10 flex items-center gap-2 text-xs tracking-widest"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>HOLD TO AUTHORIZE</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-24 bg-black relative z-20 border-t border-white/5">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-center text-cyan-700 text-xs font-mono mb-10 uppercase tracking-[0.5em]">/// SYSTEM_BENCHMARK</h2>
+            <div class="bg-[#0a0a0a] border border-cyan-500/30 p-8 rounded-xl shadow-2xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+                <div class="mb-8"><div class="flex justify-between text-xs font-mono mb-2 text-gray-500"><span>OTHER DEVELOPERS (MANUAL)</span><span>SPEED: 30%</span></div><div class="w-full h-4 bg-gray-900 rounded-full overflow-hidden border border-gray-800"><div class="h-full bg-red-900/50 w-[30%] relative"><div class="absolute inset-0 bg-stripes animate-slide"></div></div></div><div class="text-[9px] text-red-500 mt-1 font-mono">⚠️ High Latency, Frequent Errors</div></div>
+                <div><div class="flex justify-between text-xs font-mono mb-2 text-white"><span>JASA KIMJONG (AUTOMATED)</span><span class="text-cyan-400 font-bold">SPEED: 100%</span></div><div class="w-full h-4 bg-gray-900 rounded-full overflow-hidden border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"><div class="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 w-full relative" id="benchmark-bar" style="width: 0%"><div class="absolute inset-0 bg-stripes animate-slide"></div></div></div><div class="text-[9px] text-cyan-400 mt-1 font-mono">✅ Optimized, Secure, 24/7 Uptime</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-24 bg-black border-t border-white/5 relative z-20">
+        <div class="max-w-3xl mx-auto px-4">
+            <h2 class="text-center text-cyan-700 text-xs font-mono mb-10 uppercase tracking-[0.5em]">/// CLASSIFIED_INFO</h2>
+            <div class="space-y-4">
+                <div class="border border-gray-800 bg-gray-900/30 rounded cursor-pointer group overflow-hidden" onclick="toggleFaq(this)"><div class="p-4 flex justify-between items-center bg-black/50"><h3 class="text-sm font-bold text-gray-300 group-hover:text-cyan-400 transition font-orbitron">⚠️ APAKAH AMAN?</h3><span class="text-cyan-500 transform transition-transform duration-300">▼</span></div><div class="max-h-0 overflow-hidden transition-all duration-300 px-4 text-xs text-gray-400 font-mono border-t border-gray-800/0 group-hover:border-gray-800"><p class="py-4">100% Aman. Data Anda terenkripsi.</p></div></div>
+            </div>
+            <div class="mt-12 text-center">
+                <h2 class="text-white text-xs font-mono mb-4 tracking-[0.3em]">CLIENT_ACCESS_PORTAL</h2>
+                <div class="flex gap-2 max-w-sm mx-auto"><input type="text" id="track-id" placeholder="ENTER ORDER ID..." class="w-full bg-[#0a0a0a] border border-gray-800 p-3 text-xs font-mono text-cyan-500 outline-none focus:border-cyan-500 uppercase"><button onclick="trackOrder()" class="bg-gray-800 text-white px-6 py-2 text-xs font-bold font-mono hover:bg-cyan-900 transition sfx-click">TRACK</button></div>
+                <div id="track-output" class="text-[10px] font-mono text-red-500 mt-2 h-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-8 text-center bg-black border-t border-white/10 pb-24 md:pb-12"><div class="text-[10px] text-gray-600 font-mono mb-4">&copy; 2026 JASA KIMJONG. <span class="text-cyan-500">SYSTEM STABLE.</span></div></footer>
+
+    <div id="checkout-modal" class="fixed inset-0 bg-black/95 z-[9000] hidden items-center justify-center p-4 backdrop-blur-sm cursor-none"><div class="bg-black border border-cyan-500 w-full max-w-md p-8 relative shadow-[0_0_50px_rgba(6,182,212,0.2)] rounded-xl overflow-y-auto max-h-[90vh]"><div id="checkout-content"></div><button onclick="document.getElementById('checkout-modal').style.display='none'" class="absolute top-2 right-4 text-gray-500 hover:text-white">✕</button></div></div>
+    <div id="god-mode-modal" class="fixed inset-0 z-[12000] hidden items-center justify-center bg-red-900/90 backdrop-blur-xl"><div class="text-center p-8 border-4 border-black bg-red-600 text-black shadow-[0_0_100px_red]"><h1 class="text-6xl font-black font-orbitron mb-4">GOD MODE ACTIVATED</h1><p class="font-mono text-xl mb-8">SECRET ACCESS GRANTED: 90% DISCOUNT UNLOCKED</p><button onclick="document.getElementById('god-mode-modal').style.display='none'" class="bg-black text-red-500 px-8 py-4 font-bold border-2 border-black hover:bg-white transition">CLAIM REWARD</button></div></div>
+    <div id="exit-modal" class="fixed inset-0 z-[11000] hidden items-center justify-center backdrop-blur-xl bg-black/90"><div class="bg-red-900/20 border-2 border-red-500 w-full max-w-lg p-8 relative text-center shadow-[0_0_100px_rgba(255,0,0,0.5)] transform scale-0 transition-transform duration-300" id="exit-content"><div class="absolute top-0 left-0 bg-red-600 text-black text-[10px] font-bold px-4 py-1">⚠️ SYSTEM ALERT</div><h2 class="text-4xl font-orbitron font-black text-white mb-4 mt-4 glitch" data-text="WAIT!">WAIT!</h2><p class="text-red-200 font-mono text-sm mb-6">JANGAN TINGGALKAN HALAMAN INI.<br>Slot project bulan ini sisa <strong>1 SLOT</strong> terakhir.</p><div class="flex gap-4 justify-center"><button onclick="closeExitModal()" class="bg-red-600 text-black font-black px-8 py-3 hover:bg-white transition uppercase tracking-widest text-xs">AMBIL SLOT SAYA</button><button onclick="closeExitModal()" class="border border-red-500/50 text-red-500 px-6 py-3 hover:bg-red-900/50 transition uppercase text-xs">SAYA SUKA RUGI</button></div></div></div>
+    <div id="destruct-overlay" class="fixed inset-0 z-[15000] hidden bg-red-900/90 items-center justify-center text-center"><div class="space-y-4"><div class="text-6xl animate-bounce">⚠️</div><h1 class="text-5xl font-black font-orbitron text-white">SELF DESTRUCT INITIATED</h1><div id="destruct-timer" class="text-9xl font-mono text-black font-bold">5</div><div class="text-white font-mono animate-pulse">SYSTEM PURGE IMMINENT...</div></div></div>
+    <div id="qr-modal" class="fixed inset-0 z-[11000] hidden items-center justify-center backdrop-blur-md bg-black/90"><div class="bg-black border border-cyan-500 w-full max-w-sm p-8 relative text-center shadow-[0_0_50px_rgba(6,182,212,0.3)]"><div class="text-cyan-500 font-bold font-orbitron mb-4 text-xl">SCAN_PAYMENT</div><div class="relative w-48 h-48 mx-auto mb-4 border-2 border-white overflow-hidden bg-white p-2"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" class="w-full h-full"><div class="absolute inset-0 bg-cyan-500/30 h-1 w-full animate-scan"></div></div><p class="text-[10px] text-gray-400 font-mono mb-4">Accepting: BCA / QRIS / E-WALLET</p><button onclick="document.getElementById('qr-modal').classList.add('hidden')" class="text-red-500 text-xs font-bold border border-red-500 px-4 py-2 hover:bg-red-900/20">CANCEL</button></div></div>
+
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 group">
+        <div class="bg-black/90 border border-cyan-500 p-4 rounded-lg shadow-2xl mb-1 relative w-64 transform translate-y-4 opacity-0 transition-all duration-500 font-mono hidden" id="terminal-box">
+            <div class="flex justify-between items-center border-b border-cyan-900 pb-2 mb-2"><span class="text-[10px] text-cyan-500">NEURAL_ASSISTANT v2.0</span><span class="text-[8px] text-red-500 cursor-pointer hover:text-white" onclick="toggleTerminal()">[CLOSE]</span></div>
+            <div class="h-32 overflow-y-auto text-[10px] text-gray-300 space-y-2 mb-2 custom-scrollbar" id="terminal-log"><div class="text-cyan-500">> System initialized.</div><div class="text-white">Halo! Pilih opsi di bawah:</div></div>
+            <div class="grid grid-cols-2 gap-2"><button onclick="termReply('pricelist')" class="border border-gray-700 text-[9px] py-1 hover:bg-cyan-900 hover:text-white transition">CEK HARGA</button><button onclick="termReply('garansi')" class="border border-gray-700 text-[9px] py-1 hover:bg-cyan-900 hover:text-white transition">GARANSI?</button><button onclick="termReply('order')" class="col-span-2 bg-cyan-900/50 border border-cyan-500 text-[9px] py-1 hover:bg-cyan-500 hover:text-black transition font-bold">ORDER WHATSAPP</button></div>
+        </div>
+        <div onclick="toggleTerminal()" class="bg-[#25D366] w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,211,102,0.5)] hover:scale-110 transition animate-bounce-slow relative sfx-click cursor-pointer z-50"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.506-.669-.51-.172-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.462 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg><div class="absolute top-0 right-0 w-4 h-4 bg-red-600 text-white text-[9px] flex items-center justify-center rounded-full border-2 border-black animate-pulse font-bold">1</div></div>
+    </div>
+
+    <div class="fixed bottom-6 left-6 z-50 flex items-center gap-3">
+        <button onclick="toggleMusic()" class="bg-black/80 border border-cyan-500 p-2 rounded-full text-cyan-500 hover:text-white sfx-click shadow-[0_0_15px_#06b6d4]"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 22v-20l18 10-18 10z"/></svg></button>
+        <div id="audio-viz" class="flex gap-1 h-6 items-end"><div class="w-1 bg-cyan-500 animate-bar h-2"></div><div class="w-1 bg-cyan-500 animate-bar h-4" style="animation-delay: 0.1s"></div><div class="w-1 bg-cyan-500 animate-bar h-3" style="animation-delay: 0.2s"></div><div class="w-1 bg-cyan-500 animate-bar h-5" style="animation-delay: 0.3s"></div></div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 w-full z-[10000] bg-[#111] border-t border-cyan-500/50 p-3 md:hidden flex justify-between items-center shadow-2xl">
+        <div class="flex flex-col"><span class="text-[9px] text-gray-400">SLOT PROJECT:</span><span class="text-red-500 text-xs font-black animate-pulse">HAMPIR HABIS</span></div>
+        <button onclick="document.getElementById('pricing').scrollIntoView()" class="bg-cyan-500 text-black font-black px-6 py-2 rounded shadow-lg hover:bg-white transition uppercase text-xs tracking-widest">ORDER NOW</button>
+    </div>
+
+    <div id="cmd-modal" class="fixed inset-0 z-[13000] hidden items-start justify-center pt-32 bg-black/80 backdrop-blur-sm" onclick="closeCmd(event)">
+        <div class="w-full max-w-2xl bg-[#0a0a0a] border border-cyan-500/50 rounded-lg shadow-[0_0_50px_rgba(6,182,212,0.2)] overflow-hidden transform transition-all scale-95 opacity-0" id="cmd-box">
+            <div class="flex items-center border-b border-gray-800 p-4"><span class="text-cyan-500 mr-3 text-xl">›</span><input type="text" id="cmd-input" placeholder="Type a command (Try: 'Buy', 'Music', 'Hack')..." class="w-full bg-transparent text-white font-mono outline-none text-lg uppercase" autocomplete="off" onkeyup="filterCmd()"><span class="text-xs text-gray-600 border border-gray-700 px-2 py-1 rounded">ESC</span></div>
+            <div class="max-h-64 overflow-y-auto p-2 space-y-1" id="cmd-results"></div>
+            <div class="bg-gray-900/50 p-2 text-[10px] text-gray-500 flex justify-between font-mono"><span>JASA KIMJONG OS v48.0</span><span>CTRL + K to Toggle</span></div>
+        </div>
+    </div>
+
+    <div id="sleep-mode" class="fixed inset-0 z-[12000] bg-black/80 pointer-events-none opacity-0 transition-opacity duration-1000 flex items-center justify-center"><div class="text-cyan-500 font-mono text-xs animate-pulse">SYSTEM IDLE // ENERGY SAVING ACTIVE</div></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
