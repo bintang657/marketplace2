@@ -14,9 +14,42 @@ body { background-color: var(--bg); cursor: none; }
 #boot-screen {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;
   background: black;
-  background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('https://files.catbox.moe/26zawj.jpg');
+  background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('https://files.catbox.moe/26zawj.jpg');
   background-size: cover;
   background-position: center;
+}
+
+/* SCAN ANIMATION */
+@keyframes scan-fast {
+  0% { top: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+.animate-scan-fast { animation: scan-fast 1.5s linear infinite; }
+
+/* GLITCH TEXT EFFECT */
+.glitch-text { position: relative; }
+.glitch-text::before, .glitch-text::after {
+  content: attr(data-text);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: black;
+}
+.glitch-text::before {
+  left: 2px; text-shadow: -1px 0 red; clip-path: inset(44% 0 61% 0);
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+  left: -2px; text-shadow: -1px 0 blue; clip-path: inset(58% 0 10% 0);
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim {
+  0% { clip-path: inset(80% 0 10% 0); }
+  20% { clip-path: inset(10% 0 60% 0); }
+  40% { clip-path: inset(40% 0 40% 0); }
+  60% { clip-path: inset(85% 0 5% 0); }
+  80% { clip-path: inset(20% 0 70% 0); }
+  100% { clip-path: inset(50% 0 30% 0); }
 }
 
 /* PARTICLES */
@@ -32,6 +65,7 @@ body { background-color: var(--bg); cursor: none; }
 .clip-nav { clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 2% 100%, 0 80%); }
 .clip-button { clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%); }
 .text-shadow-cyan { text-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
+
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--neon); }
 ::-webkit-scrollbar-track { background: #000; }
@@ -40,12 +74,6 @@ body { background-color: var(--bg); cursor: none; }
 .animate-spin-slow { animation: spin 10s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .animate-reverse-spin { animation: spin 15s linear infinite reverse; }
-.animate-scan-fast { animation: scan 2s infinite ease-in-out; }
-@keyframes scan {
-  0%, 100% { top: 0%; opacity: 0; }
-  50% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
 
 /* CURSOR */
 #cursor-hud {
@@ -73,21 +101,17 @@ body { background-color: var(--bg); cursor: none; }
 }
 .hover-active .crosshair-center { background-color: red; }
 
-/* Tilt (VanillaTilt) */
+/* Tilt */
 .tilt-card { transform-style: preserve-3d; }
 .tilt-card > * { transform: translateZ(20px); }
 
-.grid-overlay {
-  background-image:
-    linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-.vignette { background: radial-gradient(circle, transparent 60%, black 100%); }
-
 /* NAVBAR STYLE ON SCROLL */
 #main-nav.nav-scrolled > div {
-  background: rgba(0,0,0,0.92) !important;
-  border-color: rgba(6,182,212,0.25) !important;
-  box-shadow: 0 0 35px rgba(6,182,212,0.10);
+  background: rgba(0,0,0,0.95) !important;
+  border-color: rgba(6,182,212,0.4) !important;
+  box-shadow: 0 0 35px rgba(6,182,212,0.15);
 }
+
+/* TERMINAL LOG */
+#terminal-output div { opacity: 0; animation: fade-in 0.3s forwards; }
+@keyframes fade-in { to { opacity: 1; } }
