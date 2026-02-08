@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JASA KIMJONG | THE ULTIMATE</title>
+    <title>JASA KIMJONG | THE APEX</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
@@ -46,9 +46,14 @@
                 <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-full"></div>
             </div>
         </div>
+        
         <h1 class="text-5xl md:text-7xl font-orbitron font-black text-white tracking-[0.1em] drop-shadow-[0_0_25px_rgba(6,182,212,1)] mb-4 glitch" data-text="JASA KIMJONG">JASA KIMJONG</h1>
         <div class="text-cyan-500/80 text-xs md:text-sm font-mono tracking-[0.4em] mb-10 animate-pulse">/// SYSTEM_OVERRIDE // WELCOME</div>
-        <div class="w-72 h-[2px] bg-gray-900 relative overflow-hidden mb-10"><div id="boot-bar" class="h-full bg-cyan-400 w-0 shadow-[0_0_20px_#06b6d4]"></div></div>
+        
+        <div class="w-72 h-[2px] bg-gray-900 relative overflow-hidden mb-10">
+            <div id="boot-bar" class="h-full bg-cyan-400 w-0 shadow-[0_0_20px_#06b6d4]"></div>
+        </div>
+        
         <button id="start-btn" class="hidden relative border-2 border-cyan-500 text-cyan-400 px-16 py-4 hover:bg-cyan-500 hover:text-black transition-all duration-300 uppercase tracking-[0.25em] text-sm font-bold sfx-click bg-black/90 backdrop-blur-xl shadow-[0_0_30px_rgba(6,182,212,0.3)] overflow-hidden group">
             <span class="relative z-10 group-hover:text-black transition">INITIALIZE</span>
             <div class="absolute inset-0 bg-cyan-500 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
@@ -219,6 +224,16 @@
         <div class="flex flex-col"><span class="text-[9px] text-gray-400">SLOT PROJECT:</span><span class="text-red-500 text-xs font-black animate-pulse">HAMPIR HABIS</span></div>
         <button onclick="document.getElementById('pricing').scrollIntoView()" class="bg-cyan-500 text-black font-black px-6 py-2 rounded shadow-lg hover:bg-white transition uppercase text-xs tracking-widest">ORDER NOW</button>
     </div>
+
+    <div id="cmd-modal" class="fixed inset-0 z-[13000] hidden items-start justify-center pt-32 bg-black/80 backdrop-blur-sm" onclick="closeCmd(event)">
+        <div class="w-full max-w-2xl bg-[#0a0a0a] border border-cyan-500/50 rounded-lg shadow-[0_0_50px_rgba(6,182,212,0.2)] overflow-hidden transform transition-all scale-95 opacity-0" id="cmd-box">
+            <div class="flex items-center border-b border-gray-800 p-4"><span class="text-cyan-500 mr-3 text-xl">›</span><input type="text" id="cmd-input" placeholder="Type a command (Try: 'Buy', 'Music', 'Hack')..." class="w-full bg-transparent text-white font-mono outline-none text-lg uppercase" autocomplete="off" onkeyup="filterCmd()"><span class="text-xs text-gray-600 border border-gray-700 px-2 py-1 rounded">ESC</span></div>
+            <div class="max-h-64 overflow-y-auto p-2 space-y-1" id="cmd-results"></div>
+            <div class="bg-gray-900/50 p-2 text-[10px] text-gray-500 flex justify-between font-mono"><span>JASA KIMJONG OS v48.0</span><span>CTRL + K to Toggle</span></div>
+        </div>
+    </div>
+
+    <div id="sleep-mode" class="fixed inset-0 z-[12000] bg-black/80 pointer-events-none opacity-0 transition-opacity duration-1000 flex items-center justify-center"><div class="text-cyan-500 font-mono text-xs animate-pulse">SYSTEM IDLE // ENERGY SAVING ACTIVE</div></div>
 
     <script src="script.js"></script>
 </body>
