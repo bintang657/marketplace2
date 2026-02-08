@@ -10,13 +10,23 @@ body { background-color: var(--bg); cursor: none; }
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
 
+/* CRT SCANLINES (NEW) */
+.bg-scanlines {
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+.bg-vignette {
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+}
+
 /* BOOT SCREEN */
 #boot-screen {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;
   background: black;
   background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('https://files.catbox.moe/26zawj.jpg');
-  background-size: cover;
-  background-position: center;
+  background-size: cover; background-position: center;
 }
 
 /* SCAN ANIMATION */
@@ -32,17 +42,10 @@ body { background-color: var(--bg); cursor: none; }
 .glitch-text { position: relative; }
 .glitch-text::before, .glitch-text::after {
   content: attr(data-text);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: black;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black;
 }
-.glitch-text::before {
-  left: 2px; text-shadow: -1px 0 red; clip-path: inset(44% 0 61% 0);
-  animation: glitch-anim 2s infinite linear alternate-reverse;
-}
-.glitch-text::after {
-  left: -2px; text-shadow: -1px 0 blue; clip-path: inset(58% 0 10% 0);
-  animation: glitch-anim 2s infinite linear alternate-reverse;
-}
+.glitch-text::before { left: 2px; text-shadow: -1px 0 red; clip-path: inset(44% 0 61% 0); animation: glitch-anim 2s infinite linear alternate-reverse; }
+.glitch-text::after { left: -2px; text-shadow: -1px 0 blue; clip-path: inset(58% 0 10% 0); animation: glitch-anim 2s infinite linear alternate-reverse; }
 @keyframes glitch-anim {
   0% { clip-path: inset(80% 0 10% 0); }
   20% { clip-path: inset(10% 0 60% 0); }
@@ -52,20 +55,15 @@ body { background-color: var(--bg); cursor: none; }
   100% { clip-path: inset(50% 0 30% 0); }
 }
 
-/* PARTICLES */
+/* PARTICLES & CANVAS */
 #particles-js { filter: drop-shadow(0 0 8px rgba(6,182,212,0.35)); }
-
-/* MATRIX CANVAS */
-#matrix-canvas {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: -1; opacity: 0.15;
-}
+#matrix-canvas, #trail-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+#trail-canvas { z-index: 2; }
 
 /* UTILS */
 .clip-nav { clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 2% 100%, 0 80%); }
 .clip-button { clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%); }
 .text-shadow-cyan { text-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
-
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--neon); }
 ::-webkit-scrollbar-track { background: #000; }
@@ -76,36 +74,17 @@ body { background-color: var(--bg); cursor: none; }
 .animate-reverse-spin { animation: spin 15s linear infinite reverse; }
 
 /* CURSOR */
-#cursor-hud {
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  position: fixed; top: 0; left: 0;
-  transition: transform 0.05s linear;
-}
-.crosshair-center {
-  width: 4px; height: 4px; border-radius: 50%;
-  position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-}
-.crosshair-circle {
-  width: 40px; height: 40px;
-  border: 1px solid; border-radius: 50%;
-  position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0.5; transition: all 0.2s;
-}
-.hover-active .crosshair-circle {
-  width: 20px; height: 20px;
-  border-color: red; border-width: 2px;
-  animation: spin 1s infinite linear;
-}
+#cursor-hud { pointer-events: none; transform: translate(-50%, -50%); position: fixed; top: 0; left: 0; transition: transform 0.05s linear; }
+.crosshair-center { width: 4px; height: 4px; border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.crosshair-circle { width: 40px; height: 40px; border: 1px solid; border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.5; transition: all 0.2s; }
+.hover-active .crosshair-circle { width: 20px; height: 20px; border-color: red; border-width: 2px; animation: spin 1s infinite linear; }
 .hover-active .crosshair-center { background-color: red; }
 
 /* Tilt */
 .tilt-card { transform-style: preserve-3d; }
 .tilt-card > * { transform: translateZ(20px); }
 
-/* NAVBAR STYLE ON SCROLL */
+/* NAVBAR */
 #main-nav.nav-scrolled > div {
   background: rgba(0,0,0,0.95) !important;
   border-color: rgba(6,182,212,0.4) !important;

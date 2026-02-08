@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>JASA KIMJONG | BULLETPROOF SYSTEM</title>
+  <title>JASA KIMJONG | GOD MODE</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <!-- Library untuk Screenshot -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Rajdhani:wght@600;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -15,39 +17,35 @@
 
 <body class="bg-[#020202] text-gray-300 font-rajdhani overflow-x-hidden selection:bg-cyan-500 selection:text-black cursor-none pt-10" oncontextmenu="return false;">
 
+  <!-- CRT Scanline Overlay (NEW) -->
+  <div class="fixed inset-0 z-[99999] pointer-events-none bg-scanlines opacity-10"></div>
+  <div class="fixed inset-0 z-[99998] pointer-events-none bg-vignette"></div>
+
   <!-- BOOT / BIOMETRIC SCREEN -->
   <div id="boot-screen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black text-center px-4 overflow-hidden">
-    
     <div class="relative w-64 h-64 mb-8 flex items-center justify-center">
-      <!-- Outer Rings -->
       <div class="absolute inset-0 border-2 border-cyan-500/20 rounded-full animate-spin-slow"></div>
       <div class="absolute inset-4 border border-dashed border-cyan-500/40 rounded-full animate-reverse-spin"></div>
       
-      <!-- Fingerprint Scanner Area -->
       <div class="relative w-40 h-40 rounded-full overflow-hidden border-2 border-cyan-500 shadow-[0_0_50px_rgba(6,182,212,0.4)] z-10 bg-black flex items-center justify-center group cursor-pointer" id="scan-zone">
         <img src="https://files.catbox.moe/2qzuad.jpg" class="w-full h-full object-cover opacity-50 grayscale" alt="Profile">
-        
-        <!-- Scanning Line -->
         <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent h-2 w-full animate-scan-fast shadow-[0_0_20px_#06b6d4]"></div>
-        
-        <!-- Fingerprint Icon Overlay -->
         <div class="absolute inset-0 flex items-center justify-center">
           <svg class="w-16 h-16 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.2-2.85.56-4.166"></path></svg>
         </div>
-        
         <div class="absolute bottom-2 text-[10px] font-mono text-cyan-400 tracking-widest animate-pulse">PLACE FINGER</div>
       </div>
     </div>
 
     <h1 class="text-3xl md:text-5xl font-orbitron font-black text-white tracking-widest drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] mb-2 glitch-text" data-text="JASA KIMJONG">JASA KIMJONG</h1>
-    
     <div class="text-cyan-500 font-mono text-[10px] tracking-[0.3em] mb-6 animate-pulse">/// BIOMETRIC AUTH REQUIRED ///</div>
-
     <div class="w-72 h-1 bg-gray-900 rounded-full overflow-hidden border border-cyan-900 mb-4">
       <div id="boot-bar" class="h-full bg-cyan-500 w-0 shadow-[0_0_20px_#06b6d4] transition-all duration-[3000ms] ease-out"></div>
     </div>
-    
     <div id="auth-status" class="text-[10px] font-mono text-red-500 h-4">WAITING FOR INPUT...</div>
+    
+    <!-- Voice Status Indicator -->
+    <div id="voice-indicator" class="mt-4 text-[9px] font-mono text-yellow-500 hidden">🎤 LISTENING... SAY "BUKA HARGA"</div>
   </div>
 
   <div id="main-content" class="opacity-0 transition-opacity duration-1000 pointer-events-none">
@@ -60,13 +58,16 @@
       </div>
       <div class="h-[1px] w-full bg-cyan-500/30"></div>
       <div class="text-[8px] font-mono text-gray-500" id="sat-coords">LAT: -6.200 | LON: 106.845</div>
+      <!-- Voice Command Hint -->
+      <div class="mt-2 text-[8px] font-mono text-yellow-500/70">[P] SCREENSHOT | [M] MUSIC | VOICE: ON</div>
     </div>
 
     <!-- Background Layers -->
     <div id="particles-js" class="fixed inset-0 z-[0] pointer-events-none opacity-30"></div>
     <canvas id="matrix-canvas" class="fixed inset-0 z-[1] opacity-15 pointer-events-none"></canvas>
+    <canvas id="trail-canvas" class="fixed inset-0 z-[2] pointer-events-none"></canvas>
 
-    <!-- Live Terminal Log (NEW) -->
+    <!-- Live Terminal Log -->
     <div class="fixed bottom-4 right-4 z-[8000] w-64 h-32 bg-black/90 border border-cyan-900/50 p-2 font-mono text-[9px] text-green-500 overflow-hidden rounded shadow-[0_0_15px_rgba(0,255,0,0.1)] hidden md:block">
       <div class="border-b border-cyan-900/50 mb-1 text-cyan-500 uppercase">System Log</div>
       <div id="terminal-output" class="leading-tight"></div>
@@ -88,6 +89,8 @@
     <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
     <audio id="bootSound"  src="https://assets.mixkit.co/active_storage/sfx/2044/2044-preview.mp3" preload="auto"></audio>
     <audio id="bgMusic"    src="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Rolemusic/gigs_n_contest/Rolemusic_-_02_-_The_White_Kitty.mp3" loop preload="none"></audio>
+    <!-- Extra SFX for Explosion -->
+    <audio id="popSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
 
     <nav id="main-nav" class="fixed w-full z-40 top-4 p-4 transition-all duration-300">
       <div class="flex justify-between items-center max-w-7xl mx-auto bg-black/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-full shadow-2xl clip-nav">
@@ -123,9 +126,7 @@
     <div id="services" class="py-24 relative z-20 border-t border-white/5 bg-black/80 backdrop-blur-sm">
       <div class="max-w-7xl mx-auto px-4">
         <h2 class="text-cyan-700 text-xs font-mono mb-16 text-center uppercase tracking-[0.5em]">/// NEURAL_MODULES</h2>
-
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <!-- Card 1 -->
           <div class="tilt-card bg-[#080808] border border-gray-800 p-8 relative group hover:border-cyan-500 transition duration-500 sfx-hover cursor-pointer" onclick="openCheckout('WEB STORE', 350000)">
             <div class="absolute -right-4 -top-4 text-cyan-900/20 font-black text-8xl font-orbitron group-hover:text-cyan-500/10 transition">01</div>
             <div class="text-cyan-500 text-4xl mb-4">🌐</div>
@@ -135,8 +136,6 @@
             <div class="text-[9px] text-cyan-500 font-mono text-right">LOAD: 85%</div>
             <div class="mt-4 text-white font-bold font-mono text-xl">Rp 350.000</div>
           </div>
-
-          <!-- Card 2 -->
           <div class="tilt-card bg-[#080808] border border-gray-800 p-8 relative group hover:border-yellow-500 transition duration-500 sfx-hover cursor-pointer" onclick="openCheckout('BOT MANAGER', 150000)">
             <div class="absolute -right-4 -top-4 text-yellow-900/20 font-black text-8xl font-orbitron group-hover:text-yellow-500/10 transition">02</div>
             <div class="text-yellow-500 text-4xl mb-4">🤖</div>
@@ -146,8 +145,6 @@
             <div class="text-[9px] text-yellow-500 font-mono text-right">LOAD: 92%</div>
             <div class="mt-4 text-white font-bold font-mono text-xl">Rp 150.000</div>
           </div>
-
-          <!-- Card 3 -->
           <div class="tilt-card bg-[#080808] border border-gray-800 p-8 relative group hover:border-red-500 transition duration-500 sfx-hover cursor-pointer" onclick="openCheckout('PYTHON SCRIPT', 75000)">
             <div class="absolute -right-4 -top-4 text-red-900/20 font-black text-8xl font-orbitron group-hover:text-red-500/10 transition">03</div>
             <div class="text-red-500 text-4xl mb-4">🐍</div>
@@ -165,9 +162,7 @@
       <div class="max-w-5xl mx-auto px-4">
         <div class="bg-[#0a0a0a] border border-cyan-500/30 p-10 rounded-xl shadow-[0_0_50px_rgba(6,182,212,0.1)] relative overflow-hidden">
           <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
-          
           <h2 class="text-white font-orbitron text-2xl uppercase mb-8 text-center">Protocol <span class="text-cyan-500">Selection</span></h2>
-
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <select id="projectType" onchange="calcPrice()" class="w-full bg-black text-gray-300 border border-gray-700 p-4 text-xs font-mono outline-none focus:border-cyan-500 rounded hover:bg-gray-900 transition">
               <option value="0">SELECT_MODULE...</option>
@@ -175,14 +170,12 @@
               <option value="350000">WEB LANDING PAGE (350K)</option>
               <option value="500000">FULL SYSTEM (500K)</option>
             </select>
-
             <select id="addonType" onchange="calcPrice()" class="w-full bg-black text-gray-300 border border-gray-700 p-4 text-xs font-mono outline-none focus:border-cyan-500 rounded hover:bg-gray-900 transition">
               <option value="0">STANDARD SPEED</option>
               <option value="50000">SOURCE CODE (+50K)</option>
               <option value="100000">HOSTING SETUP (+100K)</option>
             </select>
           </div>
-
           <div class="flex justify-between items-center border-t border-gray-800 pt-6">
             <div>
               <div class="text-[10px] text-gray-500 font-mono tracking-widest">ESTIMATED COST</div>
