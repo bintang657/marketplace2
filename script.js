@@ -412,6 +412,87 @@ async function initFaceAuth() {
   const mainContent = document.getElementById('main-content');
   const skipBtn = document.getElementById('skip-auth');
   const bootSound = document.getElementById('bootSound');
+  
+  // NEW: Dynamic Text Animation untuk auth-status
+  const statusMessages = [
+    "INITIALIZING BIOMETRIC PROTOCOLS...",
+    "SCANNING RETINAL PATTERNS...",
+    "ANALYZING DNA SEQUENCES...",
+    "VERIFYING NEURAL SIGNATURE...",
+    "ACCESS GRANTED - WELCOME COMMANDER"
+  ];
+  let messageIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let typeSpeed = 50;
+
+  function typeStatus() {
+    const currentMessage = statusMessages[messageIndex];
+    
+    if (isDeleting) {
+      authStatus.textContent = currentMessage.substring(0, charIndex - 1);
+      charIndex--;
+    } else {
+      authStatus.textContent = currentMessage.substring(0, charIndex + 1);
+      charIndex++;
+    }
+
+    if (!isDeleting && charIndex === currentMessage.length) {
+      isDeleting = true;
+      typeSpeed = 30;
+      setTimeout(typeStatus, 1000);
+      return;
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      messageIndex = (messageIndex + 1) % statusMessages.length;
+      typeSpeed = 50;
+      setTimeout(typeStatus, 500);
+      return;
+    }
+
+    setTimeout(typeStatus, typeSpeed);
+  }
+
+  // Start typing effect
+  setTimeout(typeStatus, 1000);
+
+  // NEW: Particles.js untuk boot screen
+  setTimeout(() => {
+    if (typeof particlesJS !== 'undefined') {
+      particlesJS("boot-particles", {
+        particles: {
+          number: { value: 30, density: { enable: true, value_area: 400 } },
+          color: { value: "#06b6d4" },
+          shape: { type: "circle" },
+          opacity: { value: 0.5, random: true },
+          size: { value: 2, random: true },
+          line_linked: { enable: true, distance: 150, color: "#06b6d4", opacity: 0.2, width: 1 },
+          move: { enable: true, speed: 1, direction: "none", out_mode: "out" }
+        },
+        interactivity: {
+          detect_on: "window",
+          events: { onhover: { enable: false }, onclick: { enable: false }, resize: true }
+        },
+        retina_detect: true
+      });
+    }
+  }, 500);
+
+  // NEW: Ubah teks cam-status berdasarkan waktu
+  setInterval(() => {
+    const camStatus = document.getElementById('cam-status');
+    const messages = [
+      "SCANNING FACIAL GEOMETRY...",
+      "TRACKING EYE MOVEMENTS...",
+      "MONITORING VITAL SIGNS...",
+      "NEURAL LINK ESTABLISHED"
+    ];
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    if (camStatus && Math.random() > 0.7) {
+      camStatus.textContent = randomMsg;
+    }
+  }, 2000);
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;

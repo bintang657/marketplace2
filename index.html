@@ -38,32 +38,52 @@
   <div class="fixed inset-0 z-[99997] pointer-events-none bg-scanlines opacity-10"></div>
   <div class="fixed inset-0 z-[99996] pointer-events-none bg-vignette"></div>
 
-  <!-- BOOT SCREEN -->
+  <!-- BOOT SCREEN BARU -->
   <div id="boot-screen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black text-center px-4 overflow-hidden select-none">
-    <div class="relative w-64 h-64 mb-8 flex items-center justify-center">
-      <div class="absolute inset-0 border-2 border-cyan-500/20 rounded-full animate-spin-slow"></div>
-      <div class="absolute inset-4 border border-dashed border-cyan-500/40 rounded-full animate-reverse-spin"></div>
+    <!-- Background Particles -->
+    <div id="boot-particles" class="absolute inset-0 pointer-events-none"></div>
+    
+    <!-- Glitch Overlay -->
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwZmZmZiIgc3Ryb2tlLXdpZHRoPSIwLjUiIG9wYWNpdHk9IjAuMDUiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 animate-pulse"></div>
+
+    <!-- Central Hologram -->
+    <div class="relative w-80 h-80 mb-8 flex items-center justify-center transform scale-110">
+      <div class="absolute inset-0 border-2 border-cyan-500/30 rounded-full animate-spin-slow"></div>
+      <div class="absolute inset-8 border border-dashed border-cyan-500/50 rounded-full animate-reverse-spin"></div>
       
-      <div class="relative w-40 h-40 rounded-full overflow-hidden border-2 border-cyan-500 shadow-[0_0_50px_rgba(6,182,212,0.4)] z-10 bg-black flex items-center justify-center" id="camera-zone">
-        <video id="webcam-video" class="w-full h-full object-cover opacity-80" autoplay playsinline muted></video>
+      <div class="relative w-48 h-48 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_80px_rgba(6,182,212,0.8)] z-10 bg-black/80 flex items-center justify-center backdrop-blur-sm" id="camera-zone">
+        <video id="webcam-video" class="w-full h-full object-cover opacity-90" autoplay playsinline muted></video>
         <canvas id="face-canvas" class="absolute inset-0 w-full h-full"></canvas>
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent h-2 w-full animate-scan-fast"></div>
-        <div class="absolute inset-0 flex items-center justify-center bg-black/50" id="cam-overlay">
-          <svg class="w-12 h-12 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/70 to-transparent h-2 w-full animate-scan-fast"></div>
+        <div class="absolute inset-0 flex items-center justify-center bg-black/60" id="cam-overlay">
+          <svg class="w-16 h-16 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
         </div>
-        <div class="absolute bottom-2 text-[9px] font-mono text-cyan-400 tracking-widest" id="cam-status">ASCENDING...</div>
+        <div class="absolute bottom-3 text-[10px] font-mono text-cyan-300 tracking-[0.2em] animate-pulse" id="cam-status">INITIATING NEURAL LINK...</div>
       </div>
+      
+      <!-- Glowing Rings -->
+      <div class="absolute w-64 h-64 border border-cyan-500/20 rounded-full animate-ping opacity-20"></div>
+      <div class="absolute w-72 h-72 border border-cyan-500/10 rounded-full animate-ping opacity-10" style="animation-delay: 0.5s"></div>
     </div>
 
-    <h1 class="text-3xl md:text-5xl font-orbitron font-black text-white tracking-widest drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] mb-2 glitch-text" data-text="JASA KIMJONG">JASA KIMJONG</h1>
-    <div class="text-cyan-500 font-mono text-[10px] tracking-[0.3em] mb-6 animate-pulse">/// BIOMETRIC AUTH REQUIRED ///</div>
+    <!-- Glitch Title -->
+    <h1 class="text-4xl md:text-6xl font-orbitron font-black text-white tracking-[0.3em] drop-shadow-[0_0_25px_rgba(6,182,212,0.9)] mb-2 glitch-text" data-text="JASA KIMJONG">JASA KIMJONG</h1>
+    <div class="text-cyan-400 font-mono text-[11px] tracking-[0.4em] mb-6 animate-pulse text-shadow-[0_0_10px_rgba(6,182,212,0.8)]">/// NEURAL INTERFACE ACTIVATING ///</div>
     
-    <div class="w-72 h-1 bg-gray-900 rounded-full overflow-hidden border border-cyan-900 mb-4">
-      <div id="boot-bar" class="h-full bg-cyan-500 w-0 shadow-[0_0_20px_#06b6d4] transition-all duration-[3000ms] ease-out"></div>
+    <!-- Progress Bar with Glitch Effect -->
+    <div class="w-80 h-2 bg-gray-900 rounded-full overflow-hidden border border-cyan-900/50 mb-4 relative">
+      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent animate-shimmer"></div>
+      <div id="boot-bar" class="h-full bg-gradient-to-r from-cyan-600 via-cyan-400 to-cyan-600 w-0 shadow-[0_0_30px_#06b6d4,0_0_60px_#06b6d4] transition-all duration-[3000ms] ease-out relative overflow-hidden">
+        <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+      </div>
     </div>
     
-    <div id="auth-status" class="text-[10px] font-mono text-red-500 h-4">WAITING FOR BIOMETRICS...</div>
-    <button id="skip-auth" class="mt-4 text-[8px] text-gray-600 hover:text-white underline">Skip Biometric</button>
+    <!-- Dynamic Status Text -->
+    <div id="auth-status" class="text-[11px] font-mono text-red-500 h-6 font-bold tracking-widest animate-pulse">INITIALIZING BIOMETRIC PROTOCOLS...</div>
+    <button id="skip-auth" class="mt-4 text-[9px] text-gray-500 hover:text-cyan-400 underline transition-colors duration-300 uppercase tracking-wider">Emergency Override</button>
+
+    <!-- Scanlines Effect -->
+    <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] animate-scanlines opacity-20 pointer-events-none"></div>
   </div>
 
   <div id="main-content" class="opacity-0 transition-opacity duration-1000 pointer-events-none">
