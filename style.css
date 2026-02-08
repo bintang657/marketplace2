@@ -12,35 +12,75 @@ body { background-color: var(--bg); cursor: none; }
 
 /* BOOT SCREEN */
 #boot-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;
-    background: black;
-    background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('https://files.catbox.moe/26zawj.jpg');
-    background-size: cover;
-    background-position: center;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;
+  background: black;
+  background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('https://files.catbox.moe/26zawj.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
+/* PARTICLES */
+#particles-js { filter: drop-shadow(0 0 8px rgba(6,182,212,0.35)); }
+
 /* MATRIX CANVAS */
-#matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; opacity: 0.15; }
+#matrix-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: -1; opacity: 0.15;
+}
 
 /* UTILS */
 .clip-nav { clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 2% 100%, 0 80%); }
 .clip-button { clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%); }
 .text-shadow-cyan { text-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
-::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--neon); } ::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--neon); }
+::-webkit-scrollbar-track { background: #000; }
 
 /* ANIMATIONS */
 .animate-spin-slow { animation: spin 10s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .animate-reverse-spin { animation: spin 15s linear infinite reverse; }
 .animate-scan-fast { animation: scan 2s infinite ease-in-out; }
-@keyframes scan { 0%, 100% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+@keyframes scan {
+  0%, 100% { top: 0%; opacity: 0; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
 
 /* CURSOR */
-#cursor-hud { pointer-events: none; transform: translate(-50%, -50%); position: fixed; top: 0; left: 0; transition: transform 0.05s linear; }
-.crosshair-center { width: 4px; height: 4px; border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-.crosshair-circle { width: 40px; height: 40px; border: 1px solid; border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.5; transition: all 0.2s; }
-.hover-active .crosshair-circle { width: 20px; height: 20px; border-color: red; border-width: 2px; animation: spin 1s infinite linear; }
+#cursor-hud {
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  position: fixed; top: 0; left: 0;
+  transition: transform 0.05s linear;
+}
+.crosshair-center {
+  width: 4px; height: 4px; border-radius: 50%;
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+}
+.crosshair-circle {
+  width: 40px; height: 40px;
+  border: 1px solid; border-radius: 50%;
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.5; transition: all 0.2s;
+}
+.hover-active .crosshair-circle {
+  width: 20px; height: 20px;
+  border-color: red; border-width: 2px;
+  animation: spin 1s infinite linear;
+}
 .hover-active .crosshair-center { background-color: red; }
 
-.grid-overlay { background-image: linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px); background-size: 40px 40px; }
+/* Tilt (VanillaTilt) */
+.tilt-card { transform-style: preserve-3d; }
+.tilt-card > * { transform: translateZ(20px); }
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
 .vignette { background: radial-gradient(circle, transparent 60%, black 100%); }
